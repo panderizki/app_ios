@@ -136,4 +136,27 @@ if not df.empty and "Jumlah" in df.columns:
     else:
         st.write("Belum ada data pada periode ini.")
 else:
+# --- MENGHAPUS TRANSAKSI DARI APLIKASI ---
+with st.expander("🗑️ Hapus / Edit Transaksi"):
+    if not df_tampil.empty:
+        # Pilihan daftar transaksi berdasarkan nomor baris
+        pilihan_hapus = st.selectbox(
+            "Pilih transaksi yang ingin dihapus:",
+            options=df_tampil.index,
+            format_func=lambda i: f"[{df_tampil.loc[i, 'Tanggal']}] {df_tampil.loc[i, 'Kategori']} - Rp {df_tampil.loc[i, 'Jumlah']:,} ({df_tampil.loc[i, 'Keterangan']})"
+        )
+        
+        if st.button("Hapus Transaksi Ini", type="primary"):
+            # Indeks di Google Sheets = indeks dataframe + 2 (karena baris 1 adalah Header)
+            row_excel = int(pilihan_hapus) + 2
+            payload = {
+                "action": "delete",
+                "rowIndex": row_excel
+            }
+            res = requests.post(WEB_APP_URL, json=payload)
+            if res.status_code == 200:
+                st.success("Transaksi berhasil dihapus!")
+                st.rerun()
+            else:
+                st.error("Gagal menghapus transaksi.")
     st.info("Belum ada transaksi tersimpan.")
