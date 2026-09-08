@@ -16,7 +16,7 @@ st.set_page_config(
 # LINK BACA (Google Sheets Publik)
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/18MBeS5NSczt_rQKXg8yZsyRc1NIX6253VW2qyT4i9PA/edit?usp=sharing"
 
-# LINK TULIS (WEB APP URL Dari Google Apps Script Langkah 1)
+# LINK TULIS (WEB APP URL Dari Google Apps Script)
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwQPPe2hOJlbWQiAE0Dfq1tBE-ieli0F_QRte8sXZMPJ6GnF0A8neB3zNthewUpcleW/exec"
 
 # Koneksi untuk MENGAMBIL data
@@ -54,7 +54,6 @@ with st.expander("➕ Tambah Transaksi Baru", expanded=False):
                 "Keterangan": keterangan if keterangan else "-"
             }
             
-            # Kirim data via Webhook (Aman & Bebas Permission Error)
             response = requests.post(WEB_APP_URL, json=payload)
             
             if response.status_code == 200:
@@ -69,6 +68,7 @@ st.markdown("---")
 
 # --- MEMUAT DATA UNTUK DASBOR ---
 df = load_data()
+df_tampil = pd.DataFrame()  # Inisialisasi awal agar tidak timbul NameError
 
 if not df.empty and "Jumlah" in df.columns:
     df["Jumlah"] = pd.to_numeric(df["Jumlah"], errors="coerce").fillna(0)
@@ -136,11 +136,11 @@ if not df.empty and "Jumlah" in df.columns:
     else:
         st.write("Belum ada data pada periode ini.")
 else:
-        st.info("Belum ada transaksi tersimpan.")
-# --- MENGHAPUS TRANSAKSI DARI APLIKASI ---
-with st.expander("🗑️ Hapus / Edit Transaksi"):
+    st.info("Belum ada transaksi tersimpan.")
+
+# --- MENGHAPUS TRANSAKSI ---
+with st.expander("🗑️ Hapus Transaksi"):
     if not df_tampil.empty:
-        # Pilihan daftar transaksi berdasarkan nomor baris
         pilihan_hapus = st.selectbox(
             "Pilih transaksi yang ingin dihapus:",
             options=df_tampil.index,
@@ -148,7 +148,6 @@ with st.expander("🗑️ Hapus / Edit Transaksi"):
         )
         
         if st.button("Hapus Transaksi Ini", type="primary"):
-            # Indeks di Google Sheets = indeks dataframe + 2 (karena baris 1 adalah Header)
             row_excel = int(pilihan_hapus) + 2
             payload = {
                 "action": "delete",
@@ -160,4 +159,5 @@ with st.expander("🗑️ Hapus / Edit Transaksi"):
                 st.rerun()
             else:
                 st.error("Gagal menghapus transaksi.")
-    st.info("Belum ada transaksi tersimpan.")
+    else:
+        st.write("Tidak ada transaksi yang dapat dihapus.")
