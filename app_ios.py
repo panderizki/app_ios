@@ -136,6 +136,7 @@ if not df.empty and "Jumlah" in df.columns:
     else:
         st.write("Belum ada data pada periode ini.")
 else:
+        st.info("Belum ada transaksi tersimpan.")
 # --- MENGHAPUS TRANSAKSI DARI APLIKASI ---
 with st.expander("🗑️ Hapus / Edit Transaksi"):
     if not df_tampil.empty:
